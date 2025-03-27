@@ -1,0 +1,28 @@
+{
+  "name": "db",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:push": "npx prisma db push --preview-feature",
+    "db:seed": "npx prisma db seed --preview-feature",
+    "db:migrate": "npx prisma migrate dev --preview-feature"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "![db](https://github.com/user-attachments/assets/dd694074-4ed8-4f47-b12d-725f1cf14b58)",
+  "devDependencies": {
+    "@faker-js/faker": "^9.6.0",
+    "@types/node": "^22.13.14",
+    "prisma": "^6.4.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "main": "index.js"
+}

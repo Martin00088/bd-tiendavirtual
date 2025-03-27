@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model VerificationRequest {
+  id         String   @id @default(cuid())
+  identifier String   @unique
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  attempts   Int      @default(0)
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  first_name    String
+  last_name     String
+  email         String    @unique
+  role          String?   @default("user")
+  password      String
+  emailVerified DateTime?
+  image         String?
+  active        Boolean?  @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  address       Address?
+  cart          Cart?
+  orders        Order[]
+  payments      Payment[]
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  payment_date   DateTime
+  payment_method String
+  createdAt      DateTime @default(now())
+  userId         String
+  updatedAt      DateTime @updatedAt
+  User           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  city      String
+  street1   String
+  street2   String?
+  number    Int?
+  country   String
+  zip_code  String
+  createdAt DateTime @default(now())
+  userId    String   @unique
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id     String     @id @default(cuid())
+  userId String     @unique
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  CartItem[]
+}
+
+model CartItem {
+  id        String           @id @default(cuid())
+  quantity  Int              @default(1)
+  cartId    String
+  productId String
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  cart      Cart             @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   ProductVariation @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  name          String
+  filename      String?
+  active        Boolean       @default(true)
+  gender        String        @default("Unisex")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  subcategories SubCategory[]
+}
+
+model SubCategory {
+  id         String    @id @default(cuid())
+  name       String
+  filename   String?
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  categoryId String?
+  updatedAt  DateTime  @updatedAt
+  products   Product[]
+  Category   Category? @relation(fields: [categoryId], references: [id])
+}
+
+model Product {
+  id               String             @id @default(cuid())
+  name             String
+  active           Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  subCategoryId    String?
+  updatedAt        DateTime           @updatedAt
+  SubCategory      SubCategory?       @relation(fields: [subCategoryId], references: [id])
+  productVariation ProductVariation[]
+}
+
+model ProductVariation {
+  id          String                      @id @default(cuid())
+  color       String?
+  colorHex    String?
+  contexture  String?
+  description String[]
+  price       Float
+  productId   String?
+  createdAt   DateTime                    @default(now())
+  totalStock  Int                         @default(0)
+  updatedAt   DateTime                    @updatedAt
+  CartItem    CartItem[]
+  Image       Image[]
+  Order_Item  Order_Item[]
+  Product     Product?                    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  SizeStock   ProductVariationSizeStock[]
+}
+
+model Image {
+  id                 String            @id @default(cuid())
+  filename           String
+  createdAt          DateTime          @default(now())
+  productVariationId String?
+  updatedAt          DateTime          @updatedAt
+  ProductVariation   ProductVariation? @relation(fields: [productVariationId], references: [id], onDelete: Cascade)
+}
+
+model ProductVariationSizeStock {
+  id                 String            @id @default(cuid())
+  stock              Int               @default(0)
+  size               String?
+  SKU                String?
+  productVariationId String?
+  ProductVariation   ProductVariation? @relation(fields: [productVariationId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id          String       @id @default(cuid())
+  order_date  DateTime
+  total_price Float
+  status      String?
+  createdAt   DateTime     @default(now())
+  userId      String
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       Order_Item[]
+}
+
+model Order_Item {
+  id        String           @id @default(cuid())
+  quantity  Int
+  price     Float
+  createdAt DateTime         @default(now())
+  orderId   String
+  productId String
+  updatedAt DateTime         @updatedAt
+  Order     Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  Product   ProductVariation @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
